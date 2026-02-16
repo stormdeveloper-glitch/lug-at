@@ -1,6 +1,11 @@
 import telebot
+import os
+from dotenv import load_dotenv
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 
-TOKEN = "8186660159:AAFP7scM0nX0wb91iK4_xCfWYxtR6yOFzao"
+
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 
 @bot.message_handler(commands=['start'])
@@ -1010,8 +1015,15 @@ ko_uz = {
     "볶다": "qovurmoq",
     "삶다": "qaynatib pishirmoq",
     "익다": "pishmoq (meva/ovqat)",
-    "부럽다": "havas qilmoq"
-
+    "부럽다": "havas qilmoq",
+    "감사합니다": "Raxmat / Tashakkur",
+    "죄송합니다": "Kechirasiz / Uzr",
+    "천만에요": "Arzimaydi",
+    "환영합니다": "Xush kelibsiz",
+    "출발": "Jo'nab ketish",
+    "도착": "Yetib kelish",
+    "비상구": "Zudlik bilan chiqish yo'li",
+    "금지": "Taqiqlangan"
 }
 
 uz_ko = {
@@ -1861,7 +1873,13 @@ uz_ko = {
     "suvi (ovqat)": "해장국",
     "havas qilmoq": "부럽다",
     "qisqichbaqa": "새우",
-    "un": "밀가루"
+    "un": "밀가루",
+    "rahmat": "감사합니다",
+    "kechirim": "죄송합니다",
+    "arzimaydi": "천만에요",
+    "chiqish": "출구",
+    "kirish": "입구",
+    "to'xtash": "정지"
 }
 
 @bot.message_handler(commands=['start'])
@@ -2272,7 +2290,6 @@ def start(message):
         "세배를 하다 → ta’zim qilmoq\n",
         "떡국 → tteokguk\n",
         "추석 → hosil bayrami\n"
-
     )
 
 @bot.message_handler(content_types=['text'])
@@ -2280,10 +2297,35 @@ def translate(message):
     text = message.text.lower().strip()
 
     if text in ko_uz:
-        bot.reply_to(message, f"🇰🇷 → 🇺🇿\n{text} = {ko_uz[text]}")
+        bot.reply_to(message, f"🇰🇷 → 🇺🇿\n**{text}** = {ko_uz[text]}", parse_mode="Markdown")
     elif text in uz_ko:
-        bot.reply_to(message, f"🇺🇿 → 🇰🇷\n{text} = {uz_ko[text]}")
+        bot.reply_to(message, f"🇺🇿 → 🇰🇷\n**{text}** = {uz_ko[text]}", parse_mode="Markdown")
     else:
-        bot.reply_to(message, "❌ Bu so‘z xato yozilgan yoki lug‘atga kiritilmagan. Lekin tashvishga o'rin yo'q. Xozirda lug'atga yangi so'zlarni kiritish davom etmoqda. Bizga ishonganiz uchun raxmat! ")
+        # Qisman qidirish
+        found = False
+        for k, v in ko_uz.items():
+            if text in k:
+                bot.reply_to(message, f"🇰🇷 → 🇺🇿\n**{k}** = {v}", parse_mode="Markdown")
+                found = True
+                break
+        if not found:
+            for k, v in uz_ko.items():
+                if text in k:
+                    bot.reply_to(message, f"🇺🇿 → 🇰🇷\n**{k}** = {v}", parse_mode="Markdown")
+                    found = True
+                    break
+        
+        if not found:
+            bot.reply_to(message, "❌ Bu so'z lug'atda topilmadi. Biz yangi so'zlarni qo'shish ustida ishlayapmiz!")
 
-bot.polling()
+import time
+
+if __name__ == '__main__':
+    print("Bot ishga tushmoqda...")
+    while True:
+        try:
+            bot.polling(none_stop=True, timeout=60)
+        except Exception as e:
+            print(f"Xatolik yuz berdi: {e}")
+            print("15 soniyadan so'ng qayta urinib ko'riladi...")
+            time.sleep(15)

@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+restore_main.py
+refactor_bot.py
+dictionary.py
+.gemini/
+.agent/
+brain/
